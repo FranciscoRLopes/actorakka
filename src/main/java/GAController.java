@@ -22,6 +22,7 @@ public class GAController extends AbstractActor {
     private int generation = 0;
     private int evaluatedCount = 0;
 
+    private long startTimeNanos;
     // Fábrica de Props para criar o GAController com N workers
     public static Props props(int nWorkers) {
         return Props.create(GAController.class, () -> new GAController(nWorkers));
@@ -53,6 +54,7 @@ public class GAController extends AbstractActor {
     }
 
     private void onStart(GAProtocol.Start msg) {
+        this.startTimeNanos = System.nanoTime();
         generation = 0;
         evaluateCurrentPopulation();
     }
@@ -78,9 +80,13 @@ public class GAController extends AbstractActor {
             generation++;
 
             if (generation >= N_GENERATIONS) {
+                long end = System.nanoTime();
+                long elapsedMs = (end - startTimeNanos) / 1_000_000;
+
                 System.out.println("Finished GA. Best solution: "
                         + best + " with " + best.fitness);
                 getContext().getSystem().terminate();
+                System.out.println("Total time (ActorModel): " + elapsedMs + " ms");
             } else {
                 // criar nova população a partir da atual
                 createNextGeneration(best);

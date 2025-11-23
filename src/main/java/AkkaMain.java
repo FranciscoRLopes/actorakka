@@ -14,5 +14,6 @@ public class AkkaMain {
 
         // inicia o GA
         controller.tell(new GAProtocol.Start(), ActorRef.noSender());
+
     }
 }
