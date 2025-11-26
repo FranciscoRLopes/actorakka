@@ -23,16 +23,16 @@ public class GAController extends AbstractActor {
     private int evaluatedCount = 0;
 
     private long startTimeNanos;
-    // Fábrica de Props para criar o GAController com N workers
+
     public static Props props(int nWorkers) {
         return Props.create(GAController.class, () -> new GAController(nWorkers));
     }
 
     private GAController(int nWorkers) {
-        // cria população inicial
+
         populateInitialPopulationRandomly();
 
-        // cria um router de fitness workers (task parallelism)
+
         this.fitnessRouter = getContext().actorOf(
                 new RoundRobinPool(nWorkers)
                         .props(Props.create(FitnessWorker.class)),
@@ -61,18 +61,15 @@ public class GAController extends AbstractActor {
 
     private void evaluateCurrentPopulation() {
         evaluatedCount = 0;
-        // manda avaliar todos os indivíduos em paralelo
         for (Individual ind : population) {
             fitnessRouter.tell(new GAProtocol.Evaluate(ind), getSelf());
         }
     }
 
     private void onEvaluated(GAProtocol.Evaluated msg) {
-        // aqui o indivíduo já tem fitness calculado
         evaluatedCount++;
 
         if (evaluatedCount == POP_SIZE) {
-            // todos avaliados -> podemos passar para seleção / cruzamento / mutação
             Individual best = bestOfPopulation();
             System.out.println("Best at generation " + generation + " is "
                     + best + " with " + best.fitness);
@@ -120,10 +117,6 @@ public class GAController extends AbstractActor {
     }
 
     private Individual tournament(int tournamentSize, Random r) {
-        /*
-         * Igual ao teu KnapsackGA: escolhe tournamentSize indivíduos aleatórios
-         * e fica com o melhor.
-         */
         Individual best = population[r.nextInt(POP_SIZE)];
         for (int i = 0; i < tournamentSize; i++) {
             Individual other = population[r.nextInt(POP_SIZE)];
@@ -135,9 +128,6 @@ public class GAController extends AbstractActor {
     }
 
     private Individual bestOfPopulation() {
-        /*
-         * Igual ao teu KnapsackGA.bestOfPopulation().
-         */
         Individual best = population[0];
         for (Individual other : population) {
             if (other.fitness > best.fitness) {

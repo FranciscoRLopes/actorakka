@@ -12,7 +12,7 @@ public class AkkaMain {
         ActorRef controller =
                 system.actorOf(GAController.props(nWorkers), "gaController");
 
-        // inicia o GA
+
         controller.tell(new GAProtocol.Start(), ActorRef.noSender());
 
     }
